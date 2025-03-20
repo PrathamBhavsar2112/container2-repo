@@ -1,11 +1,11 @@
 steps:
   # Build the Docker image for Container 2
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "gcr.io/kubernates-12345/container2:latest", "."]
+    args: ["build", "-t", "us-central1-docker.pkg.dev/kubernates-12345/pratham-repo/container2:latest", "."]
   
-  # Push the image to Google Container Registry (GCR)
+  # Push the image to Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/kubernates-12345/container2:latest"]
+    args: ["push", "us-central1-docker.pkg.dev/kubernates-12345/pratham-repo/container2:latest"]
 
   # Deploy Container 2 to GKE
   - name: "gcr.io/cloud-builders/gcloud"
@@ -19,7 +19,7 @@ steps:
 
 # Specify the images built and pushed
 images:
-  - "gcr.io/kubernates-12345/container2:latest"
+  - "us-central1-docker.pkg.dev/kubernates-12345/pratham-repo/container2:latest"
 
 # Set logging to Cloud Logging only
 options:
