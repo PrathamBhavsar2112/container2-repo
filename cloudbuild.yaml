@@ -1,10 +1,11 @@
 steps:
-  # Build and Push Container 2
+  # Build the Docker image for Container 2
   - name: "gcr.io/cloud-builders/docker"
     args: ["build", "-t", "gcr.io/kubernates-12345/container2:latest", "."]
+  
+  # Push the image to Google Container Registry (GCR)
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/kubernates-12345/container2:latest"]
- 
 
   # Deploy Container 2 to GKE
   - name: "gcr.io/cloud-builders/gcloud"
@@ -15,8 +16,11 @@ steps:
         gcloud container clusters get-credentials pratham-cluster --region us-central1
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
+
+# Specify the images built and pushed
 images:
   - "gcr.io/kubernates-12345/container2:latest"
 
+# Set logging to Cloud Logging only
 options:
   logging: CLOUD_LOGGING_ONLY
