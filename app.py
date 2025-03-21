@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import os
+import csv
 
 app = Flask(__name__)
 
@@ -16,7 +17,7 @@ def calculate():
         product_name = data["product"]
         file_path = os.path.join(PERSISTENT_VOLUME_PATH, file_name)
 
-        # ✅ Fix 1: If file does not exist, return "File not found."
+        # ✅ Fix 1: Check if file exists before anything else
         if not os.path.exists(file_path):
             return jsonify({"file": file_name, "error": "File not found."}), 404
 
@@ -24,32 +25,31 @@ def calculate():
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # ✅ Fix 2: Normalize header (removes spaces and checks lowercase)
+            # ✅ Fix 2: Normalize header (lowercase & remove spaces)
             header = lines[0].strip().lower().replace(" ", "")
             if header != "product,amount":
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
-            # ✅ Fix 3: Check CSV row structure
-            for line in lines[1:]:
-                parts = line.strip().split(",")
-
-                # Ensure every row has **exactly 2 columns**
-                if len(parts) != 2:
+            # ✅ Fix 3: Validate each row strictly before processing
+            csv_reader = csv.reader(lines[1:], delimiter=",")
+            for row in csv_reader:
+                if len(row) != 2:
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
-                product, amount = parts
+                product, amount = row
+                product = product.strip()
+                amount = amount.strip()
 
-                # Ensure second column is a number
-                if not amount.strip().isdigit():
+                # Ensure amount is a valid integer
+                if not amount.isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
-                if product.strip() == product_name:
-                    total_sum += int(amount.strip())
+                if product == product_name:
+                    total_sum += int(amount)
 
         return jsonify({"file": file_name, "sum": total_sum}), 200
 
     except Exception:
-        # ✅ Fix 4: Ensure correct error message in case of unexpected errors
         return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
 if __name__ == "__main__":
