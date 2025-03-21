@@ -23,12 +23,14 @@ def calculate():
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # Fix: Ensure correct CSV format check
+            # **Fix: Ensure correct CSV format check**
             if not lines or not lines[0].strip().startswith("product, amount"):
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
             for line in lines[1:]:
                 parts = line.strip().split(",")
+                
+                # **Fix: Additional check for malformed CSV rows**
                 if len(parts) != 2 or not parts[1].strip().isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
