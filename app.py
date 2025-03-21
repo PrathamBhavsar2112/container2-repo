@@ -14,20 +14,24 @@ def calculate():
 
         file_name = data["file"]
         product_name = data["product"]
-
         file_path = os.path.join(PERSISTENT_VOLUME_PATH, file_name)
+
         if not os.path.exists(file_path):
             return jsonify({"file": file_name, "error": "File not found."}), 404
 
         total_sum = 0
         with open(file_path, "r") as f:
             lines = f.readlines()
+
+            # Check for correct CSV format
             if not lines or "product, amount" not in lines[0].strip():
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
+
             for line in lines[1:]:
                 parts = line.strip().split(",")
                 if len(parts) != 2:
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
+                
                 product, amount = parts
                 if product.strip() == product_name:
                     total_sum += int(amount.strip())
@@ -37,8 +41,7 @@ def calculate():
     except ValueError:
         return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
     except Exception:
-        return jsonify({"file": file_name if 'file_name' in locals() else None, 
-                        "error": "Error reading file."}), 500
+        return jsonify({"file": file_name, "error": "Error reading file."}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
