@@ -23,15 +23,15 @@ def calculate():
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # Check for correct CSV format
-            if not lines or "product, amount" not in lines[0].strip():
+            # Fix: Ensure correct CSV format check
+            if not lines or not lines[0].strip().startswith("product, amount"):
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
             for line in lines[1:]:
                 parts = line.strip().split(",")
-                if len(parts) != 2:
+                if len(parts) != 2 or not parts[1].strip().isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
-                
+
                 product, amount = parts
                 if product.strip() == product_name:
                     total_sum += int(amount.strip())
@@ -41,7 +41,7 @@ def calculate():
     except ValueError:
         return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
     except Exception:
-        return jsonify({"file": file_name, "error": "Error reading file."}), 500
+        return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400  # Fix for CSV format error
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
