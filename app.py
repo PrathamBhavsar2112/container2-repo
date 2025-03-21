@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import os
-import csv
 
 app = Flask(__name__)
 
@@ -17,7 +16,7 @@ def calculate():
         product_name = data["product"]
         file_path = os.path.join(PERSISTENT_VOLUME_PATH, file_name)
 
-        # ✅ Fix 1: Check if file exists before anything else
+        # Check if file exists
         if not os.path.exists(file_path):
             return jsonify({"file": file_name, "error": "File not found."}), 404
 
@@ -25,22 +24,20 @@ def calculate():
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # ✅ Fix 2: Normalize header (lowercase & remove spaces)
-            header = lines[0].strip().lower().replace(" ", "")
-            if header != "product,amount":
+            # Check header
+            if not lines or lines[0].strip().replace(" ", "") != "product,amount":
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
-            # ✅ Fix 3: Validate each row strictly before processing
-            csv_reader = csv.reader(lines[1:], delimiter=",")
-            for row in csv_reader:
-                if len(row) != 2:
+            # Process each line manually
+            for line in lines[1:]:
+                parts = line.strip().split(",")
+                if len(parts) != 2:
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
-                product, amount = row
+                product, amount = parts
                 product = product.strip()
                 amount = amount.strip()
 
-                # Ensure amount is a valid integer
                 if not amount.isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
