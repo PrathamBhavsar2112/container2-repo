@@ -24,7 +24,7 @@ def calculate():
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # Check if file is empty or lacks header
+            # Check if file is empty or lacks the exact header
             if not lines or lines[0].strip() != "product, amount":
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
@@ -40,8 +40,9 @@ def calculate():
 
         return jsonify({"file": file_name, "sum": total_sum}), 200
 
-    except Exception as e:
-        # Log the exception for debugging if possible, but return the expected error
+    except ValueError:
+        return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
+    except Exception:
         return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
 if __name__ == "__main__":
