@@ -16,6 +16,7 @@ def calculate():
         product_name = data["product"]
         file_path = os.path.join(PERSISTENT_VOLUME_PATH, file_name)
 
+        # **Ensure file exists**
         if not os.path.exists(file_path):
             return jsonify({"file": file_name, "error": "File not found."}), 404
 
@@ -24,13 +25,13 @@ def calculate():
             lines = f.readlines()
 
             # **Fix: Ensure correct CSV format check**
-            if not lines or not lines[0].strip().startswith("product, amount"):
+            if not lines or not lines[0].strip().lower() == "product, amount":
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
             for line in lines[1:]:
                 parts = line.strip().split(",")
-                
-                # **Fix: Additional check for malformed CSV rows**
+
+                # **Fix: Handle invalid CSV entries**
                 if len(parts) != 2 or not parts[1].strip().isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
