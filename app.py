@@ -16,22 +16,24 @@ def calculate():
         product_name = data["product"]
         file_path = os.path.join(PERSISTENT_VOLUME_PATH, file_name)
 
-        
+        # Check if the file exists
         if not os.path.exists(file_path):
             return jsonify({"file": file_name, "error": "File not found."}), 404
 
-        total_sum = 0
+        # Open the file and check the CSV format
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-            # **Fix: Ensure correct CSV format check**
+            # Check if the file is empty or the header is incorrect
             if not lines or not lines[0].strip().lower() == "product, amount":
                 return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
+            # Process the file content
+            total_sum = 0
             for line in lines[1:]:
                 parts = line.strip().split(",")
 
-                # **Fix: Handle invalid CSV entries**
+                # Check if the line has exactly 2 parts and the second part is a valid number
                 if len(parts) != 2 or not parts[1].strip().isdigit():
                     return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
@@ -41,10 +43,9 @@ def calculate():
 
         return jsonify({"file": file_name, "sum": total_sum}), 200
 
-    except ValueError:
-        return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
     except Exception:
-        return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400  # Fix for CSV format error
+        # Catch any unexpected errors and return the correct error message
+        return jsonify({"file": file_name, "error": "Input file not in CSV format."}), 400
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
