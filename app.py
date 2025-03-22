@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 import os
 
-#test 1
-
 app = Flask(__name__)
 
 PERSISTENT_VOLUME_PATH = "/pratham_PV_dir/"
